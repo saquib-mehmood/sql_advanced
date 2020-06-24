@@ -1,0 +1,44 @@
+Syntax:
+```CREATE TABLE [table_name] (
+    [column1_name] [column1_type],
+    [column2_name] [column2_type],
+    [column3_name] [column3_type],
+    [...]
+);
+
+```
+Each column in SQLite must have a type. While some database systems have as many as 50 distinct data types, SQLite uses only 5 behind the scenes:
+- TEXT
+- INTEGER
+- REAL
+- NUMERIC
+- BLOB
+like with `views`, if we try to create a table that already exists we will get an error. If we make a mistake when creating a table, we can use the `DROP` statement to remove the table so we can create it again:
+```
+DROP TABLE [table_name];
+
+```
+We can also use the SQLite dot command `.schema [table_name]` to view the schema for a table.
+
+If we launch the SQLite shell with the argument of a filename that doesn't exist, **SQLite will create an empty database with that filename**.
+
+**Exercise**
+Launch the SQLite shell and create a new database file, new_database.db.
+Create a new table, user, with the following columns:
+- user_id, with type INTEGER
+- first_name, with type TEXT
+- last_name, with type TEXT
+Use the .schema dot command to view the schema for newly created table.
+Quit the SQLite shell.
+
+```
+/home/pco$ sqlite3 new_database.db
+#  sqlite3> CREATE TABLE user (
+#      ...> user_id INTEGER,
+#      ...> first_name TEXT,
+#      ...> last_name TEXT
+#      ...> );
+#  sqlite3> .schema user
+#  sqlite3> .quit
+
+```
