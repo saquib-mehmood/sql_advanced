@@ -1,0 +1,155 @@
+(Shell script in accompanying script file `psql.sh`)
+### The psql tool 
+
+In this lesson, we'll work with the PostgreSQL command line tool, called `psql`.
+
+`psql` is similar to the `sqlite3` command line tool in that it allows to connect to and manage databases. `psql` connects to a running PostgreSQL server process, then enables us to:
+- Run queries.
+- Manage users and permissions.
+- Manage databases.
+
+By default, `psql` will connect to a PostgreSQL server running on the current computer, using `port 5432`. If wedon't specify a user and database to connect to, it will use the defaults.
+ By default, the name of the currently logged in system user will be used as both the PostgreSQL user name and database name.
+ 
+If you're logged in to a computer as the system user `js`, then type psql, you will connect to the `js` database as a PostgreSQL user called `js`. After you're finished working with `psq`, you can exit using the `\q` command.  
+
+**Exercise**
+- Start the PostgreSQL command line tool by typing psql.
+- Exit psql by typing \q
+
+### Running SQL Queries using psql
+
+Any valid SQL query will be executed. Because the `psql` shell is about giving instant feedback, **transactions don't apply**, and each command we type is immediately executed. This allows us to quickly test out queries and get results.
+
+Queries in psql must end with a `semicolon (;)`, or they won't be performed.
+`CREATE DATABASE dbName;`
+
+**Exercise**
+- Start the `psql` command line tool.
+- Create a database called `bank_accounts`
+- Exit the psql command line tool.
+
+### Special psql Commands
+
+We can run several special commands using psql. These commands start with a backslash (\), and can perform a variety of functions, including:
+
+- Listing databases
+- Listing tables
+- Managing users
+
+We can see a full list of all of the special functions by running `\?` after starting psql. We'll need to type `q` to exit the resulting help interface. We can also find the full list [here](https://www.postgresql.org/docs/9.4/app-psql.html).
+\
+Three common functions to run are:
+
+`\l`-- list all available databases.
+`\dt` -- list all tables in the current database.
+`\du` -- list users.
+
+**Exercise**
+- Start psql.
+- List all available databases.
+- Exit psql.
+
+### Switching Databases
+When we're connected to a specific SQL database, we can only create tables within that database, and run queries on tables in that database.
+We can connect to a different database using the `-d` option of psql. If we wanted to connect to a database called `bank_accounts`, we could use the following command:
+`psql -d bank_accounts`
+
+**Exercise**
+- Start psql and connect to the bank_accounts database.
+- create a table called deposits in bank_accounts with the following columns:
+- `id`, integer, primary key
+- `name`, text
+- `amount`, float
+- Use the \dt command to list all of the tables in bank_accounts.
+- Exit `psql -d bank_accounts`
+
+### Creating Users
+Users will be able to log into a PostgreSQL database and run queries. We can create a user with the `CREATE ROLE` statement.
+`CREATE ROLE userName;`
+By default, the user isn't allowed to login to PostgreSQL and run queries. We can fix this by adding the `WITH` and `LOGIN` statements:
+`CREATE ROLE userName WITH LOGIN;`
+
+A user cannot login unless their system user name is same as psql user name, or they login with a `password`. 
+`CREATE ROLE userName WITH LOGIN PASSWORD `password`;`
+
+If the user needs to be able to create databases, you can add that ability in with the CREATEDB statement:
+`CREATE ROLE userName WITH CREATEDB LOGIN PASSWORD 'password';`
+
+we can keep modifying how the user is created by adding statements after the `WITH` statement. Some other statements we can add are:
+
+`CREATEROLE` -- allows the user to create other users.
+`SUPERUSER` -- makes the user a superuser.
+
+For a full list of statements that can be added, see [here](https://www.postgresql.org/docs/9.4/sql-createrole.html).
+
+**Exercise**
+- Start psql.
+- Create a user called `sec` with the following modifying statements:
+- `LOGIN`
+- `PASSWORD` 'test'
+- `CREATEDB`
+- List all the users using `\du`.
+- Exit psql.
+
+### Addng Permissions
+
+When users are created, they don't have any ability, or permissions, to access tables in existing databases. This is done for security reasons, so that all permissions are issued explicitly instead of being unexpected. We can issue permissions to a user using the `GRANT` statement. The `GRANT` statement will issue permissions to access certain tables in a database to a certain user. We can allow a user to perform `SELECT` queries on a given table like this:
+`GRANT SELECT ON tableName TO userName;`
+
+If we want to grant different types of permissions, we can separate them with commas.  Below query will allow a given user to query data from a table, update rows in the table, insert rows into the table, and delete rows from the table.
+```
+GRANT SELECT, INSERT, UPDATE, DELETE ON tableName TO userName;
+```
+A shortcut for this is to use the `ALL PRIVILEGES` statement
+`GRANT ALL PRIVILEGES ON tableName TO userName;`
+
+We can use the psql `\dp` command to find out what privileges have been granted to users for a specific table:
+`\dp tableName`
+
+**Exercise**
+
+- Start psql and connect to the bank_accounts database.
+- Grant all privileges on the table deposits to the user sec.
+- List all the privileges for deposits using \dp.
+- Exit psql
+
+### Removing Permissions
+Permissions can be removed using the `REVOKE` statement. The REVOKE statement enables us to take back any permissions given via the `GRANT` statement.
+
+`REVOKE SELECT ON tableName FROM userName;`
+
+If we want to revoke different types of permissions, we can separate them with commas. 
+
+`REVOKE SELECT, INSERT, UPDATE, DELETE ON tableName FROM userName;`
+
+A shortcut for this is to use the `ALL PRIVILEGES` statement:
+
+`REVOKE ALL PRIVILEGES ON tableName FROM userName;`
+
+**Exercise**
+- Start psql and connect to the bank_accounts database.
+- Revoke all privileges on the table deposits from the user sec.
+- List all the privileges for deposits using \dp.
+- Exit psql.
+
+### Superusers
+
+A `superuser` is a special type of user that overrides all access restrictions. Superusers can perform any function in a database, and a user should only be made a superuser in special cases. Adding the `SUPERUSER` statement to a `CREATE ROLE` statement will make a user a superuser:
+
+`CREATE ROLE userName WITH SUPERUSER;`
+
+We can also setup login and a password for the superuser:
+
+`CREATE ROLE userName WITH LOGIN PASSWORD 'password' SUPERUSER;`
+
+**Exercise**
+- Start psql.
+- Create a user called aig with the following modifying statements:
+- LOGIN
+- PASSWORD 'test'
+- SUPERUSER
+- List all the users using \du.
+- Exit psql.
+
+
